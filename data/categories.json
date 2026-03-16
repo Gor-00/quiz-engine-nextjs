@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "history",
+    "name": "History",
+    "description": "Only geniuses can ace these history questions."
+  },
+  {
+    "slug": "movies",
+    "name": "Movies",
+    "description": "From 80s classics to modern blockbusters, test your movie memory."
+  },
+  {
+    "slug": "music",
+    "name": "Music",
+    "description": "Lyrics, hits, and one-hit wonders for true music fans."
+  },
+  {
+    "slug": "science",
+    "name": "Science",
+    "description": "Quick-fire science questions for curious minds."
+  },
+  {
+    "slug": "geography",
+    "name": "Geography",
+    "description": "Flags, capitals, and world trivia in 10 questions."
+  },
+  {
+    "slug": "sports",
+    "name": "Sports",
+    "description": "Score big with quizzes about the world of sports."
+  },
+  {
+    "slug": "nostalgia",
+    "name": "Nostalgia",
+    "description": "Throwback quizzes from the 80s, 90s, and beyond."
+  }
+]
+

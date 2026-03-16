@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "viral",
+    "name": "Viral Quizzes",
+    "description": "Quizzes designed to be shared, discovered, and clicked again and again."
+  },
+  {
+    "slug": "challenge",
+    "name": "Challenge Mode",
+    "description": "Harder quizzes for people who love to prove they can score 8/10 or higher."
+  },
+  {
+    "slug": "10-questions",
+    "name": "10 Question Quizzes",
+    "description": "Quick, mobile-friendly 10 question quizzes you can finish in under 2 minutes."
+  }
+]
+

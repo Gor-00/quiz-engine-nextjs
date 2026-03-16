@@ -1,0 +1,7 @@
+Add your quiz preview images here, for example:
+- 80s.jpg
+- history.jpg
+- 90s.jpg
+
+These are referenced by the quiz JSON data.
+

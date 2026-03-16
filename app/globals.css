@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply min-h-full bg-slate-950 text-slate-50;
+}
+
+body {
+  @apply antialiased;
+}
+
+a {
+  @apply text-indigo-400 hover:text-indigo-300;
+}
+
+button {
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
+}
+
+.quiz-card-hover {
+  @apply transition-transform duration-150 ease-out hover:-translate-y-1 hover:shadow-soft;
+}
+
+.fade-enter {
+  @apply opacity-0 translate-y-2;
+}
+
+.fade-enter-active {
+  @apply opacity-100 translate-y-0 transition-all duration-200 ease-out;
+}
+
