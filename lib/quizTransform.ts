@@ -15,6 +15,30 @@ export type ApiQuiz = {
   createdAt?: string;
 };
 
+export type ApiQuizFieldErrors = Partial<
+  Record<
+    | "slug"
+    | "title"
+    | "description"
+    | "category"
+    | "image"
+    | "questions"
+    | `questions.${number}.question`
+    | `questions.${number}.answers`
+    | `questions.${number}.correctIndex`,
+    string
+  >
+>;
+
+export class ApiQuizValidationError extends Error {
+  fieldErrors: ApiQuizFieldErrors;
+  constructor(message: string, fieldErrors: ApiQuizFieldErrors) {
+    super(message);
+    this.name = "ApiQuizValidationError";
+    this.fieldErrors = fieldErrors;
+  }
+}
+
 function getText(value: unknown): string {
   if (typeof value === "string") return value;
   if (value && typeof value === "object" && "en" in (value as any)) {
@@ -64,8 +88,7 @@ export function uiQuizToApiQuiz(quiz: Quiz): ApiQuiz {
         answers,
         correctIndex
       };
-    }),
-    createdAt: new Date().toISOString()
+    })
   };
 }
 
@@ -91,10 +114,7 @@ export function normalizeApiQuiz(payload: unknown): ApiQuiz {
         question: String(q.question ?? "").trim(),
         answers: Array.isArray(q.answers) ? q.answers.map((a: any) => String(a)) : [],
         correctIndex: Number(q.correctIndex ?? 0)
-      })),
-      createdAt: raw.createdAt
-        ? new Date(raw.createdAt).toISOString()
-        : new Date().toISOString()
+      }))
     };
   }
 
@@ -102,19 +122,43 @@ export function normalizeApiQuiz(payload: unknown): ApiQuiz {
 }
 
 export function validateApiQuiz(quiz: ApiQuiz): void {
-  if (!quiz.slug || !quiz.title || !quiz.description || !quiz.category) {
-    throw new Error("Missing required fields");
+  const fieldErrors: ApiQuizFieldErrors = {};
+
+  if (!quiz.slug) {
+    fieldErrors.slug = "Slug is required";
+  } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(quiz.slug)) {
+    fieldErrors.slug =
+      "Slug must be lowercase and URL-safe (letters, numbers, dashes)";
   }
+
+  if (!quiz.title) fieldErrors.title = "Title is required";
+  if (!quiz.description) fieldErrors.description = "Description is required";
+  if (!quiz.category) fieldErrors.category = "Category is required";
+  if (!quiz.image) fieldErrors.image = "Image is required";
+
   if (!Array.isArray(quiz.questions) || quiz.questions.length === 0) {
-    throw new Error("Quiz must have at least one question");
+    fieldErrors.questions = "Quiz must have at least one question";
+  } else {
+    quiz.questions.forEach((q, idx) => {
+      if (!q.question) {
+        fieldErrors[`questions.${idx}.question`] = "Question text is required";
+      }
+      if (!Array.isArray(q.answers) || q.answers.length < 2) {
+        fieldErrors[`questions.${idx}.answers`] =
+          "At least two answers are required";
+      }
+      const answersLen = Array.isArray(q.answers) ? q.answers.length : 0;
+      if (answersLen > 0) {
+        if (q.correctIndex < 0 || q.correctIndex >= answersLen) {
+          fieldErrors[`questions.${idx}.correctIndex`] =
+            "Correct answer index is out of bounds";
+        }
+      }
+    });
   }
-  for (const q of quiz.questions) {
-    if (!q.question || !Array.isArray(q.answers) || q.answers.length < 2) {
-      throw new Error("Each question must have text and at least two answers");
-    }
-    if (q.correctIndex < 0 || q.correctIndex >= q.answers.length) {
-      throw new Error("correctIndex is out of bounds");
-    }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    throw new ApiQuizValidationError("Validation failed", fieldErrors);
   }
 }
 

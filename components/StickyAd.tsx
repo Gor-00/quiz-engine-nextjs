@@ -1,8 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { AdSlot } from "./AdSlot";
 
 export function StickyAd() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center">
       <div className="pointer-events-auto w-full max-w-3xl px-3 pb-3">
