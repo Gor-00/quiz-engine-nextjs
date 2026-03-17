@@ -17,7 +17,7 @@ export default function AdminDashboard() {
       <section className="grid gap-4 sm:grid-cols-3">
         <AdminCard
           title="Create quiz"
-          description="Add a new multi-language quiz with ads configuration."
+          description="Add a new multi-language quiz."
           href="/admin/create-quiz"
         />
         <AdminCard

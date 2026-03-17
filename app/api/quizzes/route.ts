@@ -7,6 +7,7 @@ import {
   normalizeApiQuiz,
   uiQuizToApiQuiz,
   validateApiQuiz,
+  ApiQuizValidationError,
   type ApiQuiz
 } from "@/lib/quizTransform";
 
@@ -39,6 +40,38 @@ export async function POST(req: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to create quiz";
-    return NextResponse.json({ error: message }, { status: 400 });
+
+    if (error instanceof ApiQuizValidationError) {
+      return NextResponse.json(
+        { error: error.message, fieldErrors: error.fieldErrors },
+        { status: 422 }
+      );
+    }
+
+    const anyErr = error as any;
+    if (anyErr?.code === 11000) {
+      return NextResponse.json(
+        {
+          error: "Slug already exists",
+          fieldErrors: { slug: "Slug must be unique" }
+        },
+        { status: 409 }
+      );
+    }
+
+    const status =
+      message.includes("MONGODB_URI is not set") ||
+      message.includes("MongoDB connection")
+        ? 500
+        : 400;
+    const hint =
+      status === 500
+        ? "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server."
+        : undefined;
+
+    return NextResponse.json(
+      hint ? { error: message, hint } : { error: message },
+      { status }
+    );
   }
 }
