@@ -114,7 +114,7 @@ export function Header() {
                 href="/admin/login"
                 className="rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-100 hover:border-indigo-500/70 hover:text-indigo-300"
               >
-                Admin login
+                Login
               </Link>
             )
           ) : null}

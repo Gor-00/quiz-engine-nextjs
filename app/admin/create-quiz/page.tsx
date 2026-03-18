@@ -12,6 +12,7 @@ import {
 } from "@/lib/adminTypes";
 import { ImageUpload } from "@/components/ImageUpload";
 import { uiQuizToApiQuiz } from "@/lib/quizTransform";
+import { AiAutoGeneration } from "@/components/admin/AiAutoGeneration";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -56,6 +57,14 @@ const defaultQuiz: DbQuiz = {
 export default function CreateQuizPage() {
   const searchParams = useSearchParams();
   const initialSlug = normalizeSlug(searchParams.get("slug") ?? "");
+  const aiAuto = searchParams.get("ai") === "1";
+  const aiCategory = searchParams.get("category") ?? undefined;
+  const aiDifficulty = (searchParams.get("difficulty") as any) ?? undefined;
+  const aiNumQuestionsRaw = searchParams.get("numQuestions");
+  const aiNumQuestions = aiNumQuestionsRaw ? Number(aiNumQuestionsRaw) : undefined;
+  const aiIncludeImages = searchParams.get("includeImages")
+    ? searchParams.get("includeImages") !== "0"
+    : undefined;
   const [quiz, setQuiz] = useState<DbQuiz>(defaultQuiz);
   const [step, setStep] = useState<Step>(1);
   const [saving, setSaving] = useState(false);
@@ -197,14 +206,26 @@ export default function CreateQuizPage() {
       nextErrors.slug = "Use only lowercase letters, numbers, and dashes.";
     }
 
-    const titleEn = (quiz.title as any).en ?? "";
-    const descEn = (quiz.description as any).en ?? "";
+    for (const lang of LANGS) {
+      const title = (quiz.title as any)[lang] ?? "";
+      const desc = (quiz.description as any)[lang] ?? "";
+      const share = (quiz.shareText as any)[lang] ?? "";
+      const r03 = (quiz.resultMessages as any)?.["0-3"]?.[lang] ?? "";
+      const r47 = (quiz.resultMessages as any)?.["4-7"]?.[lang] ?? "";
+      const r810 = (quiz.resultMessages as any)?.["8-10"]?.[lang] ?? "";
 
-    if (!titleEn.trim()) {
-      nextErrors.title = "Title (EN) is required.";
-    }
-    if (!descEn.trim()) {
-      nextErrors.description = "Description (EN) is required.";
+      if (!title.trim()) nextErrors.title = `Title (${lang}) is required.`;
+      if (!desc.trim()) nextErrors.description = `Description (${lang}) is required.`;
+      if (!share.trim())
+        nextErrors.description =
+          nextErrors.description ?? `Share text (${lang}) is required.`;
+      if (!r03.trim() || !r47.trim() || !r810.trim()) {
+        nextErrors.description =
+          nextErrors.description ??
+          `All result messages must be filled in (${lang}).`;
+      }
+
+      if (nextErrors.title || nextErrors.description) break;
     }
     if (!quiz.image.trim()) {
       nextErrors.image = "Image is required.";
@@ -214,15 +235,29 @@ export default function CreateQuizPage() {
       nextErrors.questions = "At least one question is required.";
     } else {
       for (const [index, q] of quiz.questions.entries()) {
-        const questionEn = (q.question as any).en ?? "";
-        if (!questionEn.trim()) {
-          nextErrors.questions = `Question ${index + 1} is missing English text.`;
-          break;
+        for (const lang of LANGS) {
+          const qt = (q.question as any)?.[lang] ?? "";
+          if (!String(qt).trim()) {
+            nextErrors.questions = `Question ${index + 1} is missing (${lang}) text.`;
+            break;
+          }
         }
+        if (nextErrors.questions) break;
         if (!Array.isArray(q.answers) || q.answers.length < 2) {
           nextErrors.questions = `Question ${index + 1} must have at least 2 answers.`;
           break;
         }
+        for (const [aIndex, a] of q.answers.entries()) {
+          for (const lang of LANGS) {
+            const at = (a.text as any)?.[lang] ?? "";
+            if (!String(at).trim()) {
+              nextErrors.questions = `Question ${index + 1}, answer ${aIndex + 1} is missing (${lang}) text.`;
+              break;
+            }
+          }
+          if (nextErrors.questions) break;
+        }
+        if (nextErrors.questions) break;
         const correctIndex = q.answers.findIndex((a) => a.correct);
         if (correctIndex === -1) {
           nextErrors.questions = `Question ${index + 1} must have a correct answer.`;
@@ -487,6 +522,23 @@ export default function CreateQuizPage() {
               <option value="nostalgia">Nostalgia</option>
             </select>
           </label>
+
+          <AiAutoGeneration
+            quiz={quiz}
+            setQuiz={setQuiz}
+            isEdit={isEdit}
+            onMessage={(msg) => setMessage(msg)}
+            initial={{
+              category: aiCategory,
+              difficulty: aiDifficulty,
+              numQuestions:
+                aiNumQuestions && Number.isFinite(aiNumQuestions)
+                  ? Math.max(1, Math.min(30, aiNumQuestions))
+                  : undefined,
+              includeImages: aiIncludeImages,
+              autoGenerate: aiAuto && !isEdit
+            }}
+          />
 
           <ImageUpload
             label="Quiz image"

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import useSWR from "swr";
 import type { AnalyticsDoc, DbQuiz } from "@/lib/adminTypes";
+import { AiGenerateLauncher } from "@/components/admin/AiGenerateLauncher";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -46,6 +47,12 @@ export default function AnalyticsPage() {
           Basic per-quiz metrics: views, completions, and completion rate.
         </p>
       </section>
+
+      <AiGenerateLauncher
+        title="AI Auto-Generation"
+        description="Generate a new quiz draft (opens in Create Quiz)."
+      />
+
       <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-soft">
         <table className="w-full text-left text-xs text-slate-200">
           <thead className="border-b border-slate-800 text-[11px] uppercase text-slate-400">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ApiQuiz } from "@/lib/quizTransform";
+import { AiGenerateLauncher } from "@/components/admin/AiGenerateLauncher";
 
 type ApiError = {
   error?: string;
@@ -110,6 +111,11 @@ export default function AdminQuizzesPage() {
           </Link>
         </div>
       </section>
+
+      <AiGenerateLauncher
+        title="AI Auto-Generation"
+        description="Generate a fresh quiz draft and open it in the Create Quiz editor."
+      />
 
       <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-soft">
         <div className="mb-4">

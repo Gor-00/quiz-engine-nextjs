@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AiGenerateLauncher } from "@/components/admin/AiGenerateLauncher";
 
 export default function AdminDashboard() {
   return (
@@ -14,6 +15,7 @@ export default function AdminDashboard() {
           MongoDB and reflected on the live site.
         </p>
       </section>
+      <AiGenerateLauncher />
       <section className="grid gap-4 sm:grid-cols-3">
         <AdminCard
           title="Create quiz"

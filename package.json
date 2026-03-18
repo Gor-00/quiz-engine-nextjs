@@ -16,6 +16,7 @@
     "@auth/mongodb-adapter": "^3.11.1",
     "@types/mongoose": "^5.11.97",
     "bcryptjs": "^3.0.3",
+    "google-auth-library": "^10.6.2",
     "mongodb": "^6.5.0",
     "mongoose": "^9.3.0",
     "next": "^14.2.0",
