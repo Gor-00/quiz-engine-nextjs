@@ -1,6 +1,8 @@
  "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import type { LanguageCode, Question as UiQuestion } from "@/lib/types";
 import {
   LANGS,
@@ -52,6 +54,8 @@ const defaultQuiz: DbQuiz = {
 };
 
 export default function CreateQuizPage() {
+  const searchParams = useSearchParams();
+  const initialSlug = normalizeSlug(searchParams.get("slug") ?? "");
   const [quiz, setQuiz] = useState<DbQuiz>(defaultQuiz);
   const [step, setStep] = useState<Step>(1);
   const [saving, setSaving] = useState(false);
@@ -115,6 +119,13 @@ export default function CreateQuizPage() {
   }
 
   function removeQuestion(index: number) {
+    if (quiz.questions.length <= 1) {
+      setErrors((prev) => ({
+        ...prev,
+        questions: "Quiz must have at least one question."
+      }));
+      return;
+    }
     setQuiz((prev) => {
       const questions = prev.questions.filter((_, i) => i !== index);
       return { ...prev, questions };
@@ -295,8 +306,11 @@ export default function CreateQuizPage() {
   }
 
   useEffect(() => {
-    // no auto-load; use slug input + Load button
-  }, []);
+    if (initialSlug) {
+      setSlugToLoad(initialSlug);
+      void loadQuizBySlug(initialSlug);
+    }
+  }, [initialSlug]);
 
   async function ensureSlugUnique(slug: string): Promise<boolean> {
     const res = await fetch(`/api/quizzes/${encodeURIComponent(slug)}`);
@@ -390,6 +404,23 @@ export default function CreateQuizPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-soft">
+        <Link
+          href="/admin"
+          className="mb-3 inline-flex items-center gap-2 rounded-full border border-slate-700 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-indigo-500"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back
+        </Link>
         <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
           {isEdit ? "Edit quiz" : "Create quiz"}
         </h1>
@@ -527,6 +558,7 @@ export default function CreateQuizPage() {
                   onClick={() => removeQuestion(qIndex)}
                   aria-label="Remove question"
                   title="Remove question"
+                  disabled={quiz.questions.length <= 1}
                 >
                   <svg
                     viewBox="0 0 24 24"

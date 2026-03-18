@@ -13,10 +13,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^3.11.1",
     "@types/mongoose": "^5.11.97",
+    "bcryptjs": "^3.0.3",
     "mongodb": "^6.5.0",
     "mongoose": "^9.3.0",
     "next": "^14.2.0",
+    "next-auth": "^4.24.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "swr": "^2.4.1"

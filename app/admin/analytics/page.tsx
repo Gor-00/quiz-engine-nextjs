@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import useSWR from "swr";
 import type { AnalyticsDoc, DbQuiz } from "@/lib/adminTypes";
 
@@ -21,6 +22,23 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-soft">
+        <Link
+          href="/admin"
+          className="mb-3 inline-flex items-center gap-2 rounded-full border border-slate-700 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-indigo-500"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back
+        </Link>
         <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
           Analytics
         </h1>

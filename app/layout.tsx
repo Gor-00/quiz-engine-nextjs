@@ -4,6 +4,7 @@ import { seoGenerator } from "@/lib/seoGenerator";
 import { StickyAd } from "@/components/StickyAd";
 import { Header } from "@/components/Header";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = seoGenerator.base({
   title: "QuizLoop",
@@ -20,15 +21,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-950 text-slate-50">
-        <LanguageProvider>
-          <div className="bg-hero-glow">
-            <Header />
-            <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-6">
-              {children}
-            </main>
-          </div>
-          <StickyAd />
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <div className="bg-hero-glow">
+              <Header />
+              <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-6">
+                {children}
+              </main>
+            </div>
+            <StickyAd />
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );

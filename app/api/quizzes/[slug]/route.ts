@@ -104,3 +104,32 @@ export async function PUT(req: Request, { params }: Params) {
 export async function PATCH(req: Request, ctx: Params) {
   return PUT(req, ctx);
 }
+
+export async function DELETE(_req: Request, { params }: Params) {
+  try {
+    await connectMongo();
+    const deleted = await QuizModel.findOneAndDelete({ slug: params.slug }).lean();
+
+    if (!deleted) {
+      return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete quiz";
+    const status =
+      message.includes("MONGODB_URI is not set") ||
+      message.includes("MongoDB connection")
+        ? 500
+        : 400;
+    const hint =
+      status === 500
+        ? "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server."
+        : undefined;
+    return NextResponse.json(
+      hint ? { error: message, hint } : { error: message },
+      { status }
+    );
+  }
+}

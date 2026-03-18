@@ -21,6 +21,11 @@ export default function AdminDashboard() {
           href="/admin/create-quiz"
         />
         <AdminCard
+          title="Manage quizzes"
+          description="List, edit, and delete existing quizzes."
+          href="/admin/quizzes"
+        />
+        <AdminCard
           title="View analytics"
           description="See views, completions, and CTR per quiz."
           href="/admin/analytics"
