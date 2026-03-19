@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { resolveMongoUri } from "@/lib/mongoUri";
 
-const MONGODB_URI = resolveMongoUri();
-
 declare global {
   // eslint-disable-next-line no-var
   var mongooseConn:
@@ -23,7 +21,8 @@ export async function connectMongo(): Promise<typeof mongoose> {
   }
 
   if (!global.mongooseConn?.promise) {
-    global.mongooseConn!.promise = mongoose.connect(MONGODB_URI, {
+    const mongoUri = resolveMongoUri();
+    global.mongooseConn!.promise = mongoose.connect(mongoUri, {
       bufferCommands: false
     });
   }
