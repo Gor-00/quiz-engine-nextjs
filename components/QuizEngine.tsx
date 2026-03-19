@@ -52,6 +52,9 @@ export function QuizEngine({ quiz }: QuizEngineProps) {
           total
         });
 
+        // Ensure the next page starts at the top on mobile.
+        window.scrollTo({ top: 0, behavior: "auto" });
+
         router.push(
           `/result/${quiz.slug}?score=${encodeURIComponent(
             finalScore

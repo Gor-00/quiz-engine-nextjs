@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Quiz } from "@/lib/types";
 import { useI18n } from "./LanguageProvider";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 type QuizCardProps = {
   quiz: Quiz;
@@ -13,10 +14,12 @@ export function QuizCard({ quiz }: QuizCardProps) {
   const { localize, t } = useI18n();
   const title = localize(quiz.title);
   const description = localize(quiz.description);
+  const isMobile = useIsMobile();
+  const quizHref = isMobile ? `/quiz/${quiz.slug}?start=1` : `/quiz/${quiz.slug}`;
 
   return (
     <article className="quiz-card-hover flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
-      <Link href={`/quiz/${quiz.slug}`} className="relative block aspect-[16/9]">
+      <Link href={quizHref} className="relative block aspect-[16/9]">
         <Image
           src={quiz.image}
           alt={title}
@@ -41,7 +44,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
         </p>
         <div className="mt-4 flex items-center justify-between">
           <Link
-            href={`/quiz/${quiz.slug}`}
+            href={quizHref}
             className="inline-flex items-center justify-center rounded-full bg-indigo-500 px-4 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-indigo-400"
           >
             {t("startQuiz")}

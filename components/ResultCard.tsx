@@ -7,6 +7,7 @@ import { ShareButtons } from "./ShareButtons";
 import { AdSlot } from "./AdSlot";
 import { BadgeDisplay } from "./BadgeDisplay";
 import { useI18n } from "./LanguageProvider";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 type ResultCardProps = {
   quiz: Quiz;
@@ -15,6 +16,7 @@ type ResultCardProps = {
 
 export function ResultCard({ quiz, scoreResult }: ResultCardProps) {
   const { localize } = useI18n();
+  const isMobile = useIsMobile();
   const url = `https://example.com/result/${quiz.slug}?score=${scoreResult.score}`;
 
   const customMessage =
@@ -52,7 +54,9 @@ export function ResultCard({ quiz, scoreResult }: ResultCardProps) {
         <ShareButtons url={url} title={shareTitle} />
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href={`/quiz/${quiz.slug}?restart=1`}
+            href={
+              isMobile ? `/quiz/${quiz.slug}?start=1` : `/quiz/${quiz.slug}`
+            }
             className="inline-flex flex-1 items-center justify-center rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-soft transition hover:bg-indigo-400 sm:flex-none sm:px-6"
           >
             Restart Quiz 🔁

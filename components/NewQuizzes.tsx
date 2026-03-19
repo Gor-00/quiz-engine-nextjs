@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "./LanguageProvider";
+import { useIsMobile } from "@/lib/useIsMobile";
 import type { Quiz } from "@/lib/types";
 import type { ApiQuiz } from "@/lib/quizTransform";
 import { apiQuizToUiQuiz } from "@/lib/quizTransform";
@@ -12,6 +13,7 @@ export function NewQuizzes() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const { t, localize } = useI18n();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let active = true;
@@ -58,7 +60,9 @@ export function NewQuizzes() {
               return (
                 <Link
                   key={quiz.slug}
-                  href={`/quiz/${quiz.slug}`}
+                  href={
+                    isMobile ? `/quiz/${quiz.slug}?start=1` : `/quiz/${quiz.slug}`
+                  }
                   className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80"
                 >
                   <div className="relative aspect-video">

@@ -41,6 +41,10 @@ export function AdSlot({ position }: AdSlotProps) {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const slot = slotMap[position];
   const canRenderAd = Boolean(client && slot);
+  const wrapperClass =
+    position === "sticky"
+      ? "overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60 p-2"
+      : "my-4 overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60 p-2";
 
   useEffect(() => {
     if (!canRenderAd) return;
@@ -54,7 +58,11 @@ export function AdSlot({ position }: AdSlotProps) {
   if (!canRenderAd) {
     return (
       <div
-        className="my-4 flex items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-4 py-6 text-xs uppercase tracking-wide text-slate-500"
+        className={
+          position === "sticky"
+            ? "flex items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-4 py-3 text-xs uppercase tracking-wide text-slate-500"
+            : "my-4 flex items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-4 py-6 text-xs uppercase tracking-wide text-slate-500"
+        }
         aria-label={labelMap[position]}
       >
         <div className="text-center">
@@ -68,7 +76,7 @@ export function AdSlot({ position }: AdSlotProps) {
   }
 
   return (
-    <div className="my-4 overflow-hidden rounded-lg border border-slate-800 bg-slate-900/60 p-2">
+    <div className={wrapperClass}>
       <ins
         className="adsbygoogle block"
         style={{ display: "block", minHeight: 90 }}

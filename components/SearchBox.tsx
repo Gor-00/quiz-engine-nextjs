@@ -6,6 +6,7 @@ import type { Quiz } from "@/lib/types";
 import { useI18n } from "./LanguageProvider";
 import type { ApiQuiz } from "@/lib/quizTransform";
 import { apiQuizToUiQuiz } from "@/lib/quizTransform";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 export function SearchBox() {
   const [query, setQuery] = useState("");
@@ -13,6 +14,7 @@ export function SearchBox() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const { t, localize } = useI18n();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let active = true;
@@ -79,7 +81,11 @@ export function SearchBox() {
               {results.map((quiz) => (
                 <li key={quiz.slug}>
                   <Link
-                    href={`/quiz/${quiz.slug}`}
+                    href={
+                      isMobile
+                        ? `/quiz/${quiz.slug}?start=1`
+                        : `/quiz/${quiz.slug}`
+                    }
                     className="block px-3 py-2 text-slate-100 hover:bg-slate-800"
                   >
                     <span className="block text-[11px] uppercase tracking-wide text-slate-500">
