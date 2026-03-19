@@ -27,12 +27,17 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
     return NextResponse.json(quiz);
-  } catch {
-    const fallback = (quizzesData as Quiz[]).find((q) => q.slug === slug);
-    if (!fallback) {
-      return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      const fallback = (quizzesData as Quiz[]).find((q) => q.slug === slug);
+      if (!fallback) {
+        return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
+      }
+      return NextResponse.json(uiQuizToApiQuiz(fallback));
     }
-    return NextResponse.json(uiQuizToApiQuiz(fallback));
+    const message =
+      error instanceof Error ? error.message : "Failed to load quiz";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

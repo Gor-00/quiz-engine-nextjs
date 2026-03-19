@@ -7,12 +7,22 @@ import { Header } from "@/components/Header";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 
-export const metadata: Metadata = seoGenerator.base({
-  title: "QuizLoop",
-  description:
-    "QuizLoop – viral quizzes optimized for Facebook traffic, mobile users, and AdSense revenue.",
-  url: "/"
-});
+export const metadata: Metadata = {
+  ...seoGenerator.base({
+    title: "QuizLoop",
+    description:
+      "QuizLoop – viral quizzes optimized for Facebook traffic, mobile users, and AdSense revenue.",
+    url: "/"
+  }),
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-circle.png", type: "image/png" }
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/favicon-circle.png"
+  }
+};
 
 export default function RootLayout({
   children

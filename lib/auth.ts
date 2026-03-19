@@ -1,8 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { compare } from "bcryptjs";
-import clientPromise from "@/lib/mongodbClient";
 
 const splitEmails = (value?: string) =>
   (value ?? "")
@@ -28,7 +26,6 @@ async function isValidAdminPassword(password: string) {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt"

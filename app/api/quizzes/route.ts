@@ -21,9 +21,14 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean<ApiQuiz[]>();
     return NextResponse.json(docs);
-  } catch {
-    const fallback = (quizzesData as Quiz[]).map(uiQuizToApiQuiz);
-    return NextResponse.json(fallback);
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      const fallback = (quizzesData as Quiz[]).map(uiQuizToApiQuiz);
+      return NextResponse.json(fallback);
+    }
+    const message =
+      error instanceof Error ? error.message : "Failed to load quizzes";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
