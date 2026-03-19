@@ -1,6 +1,6 @@
- "use client";
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { LanguageCode, Question as UiQuestion } from "@/lib/types";
@@ -54,7 +54,7 @@ const defaultQuiz: DbQuiz = {
   updatedAt: ""
 };
 
-export default function CreateQuizPage() {
+function CreateQuizPageInner() {
   const searchParams = useSearchParams();
   const initialSlug = normalizeSlug(searchParams.get("slug") ?? "");
   const aiAuto = searchParams.get("ai") === "1";
@@ -802,6 +802,14 @@ export default function CreateQuizPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateQuizPage() {
+  return (
+    <Suspense fallback={<div className="text-sm text-slate-300">Loading admin editor…</div>}>
+      <CreateQuizPageInner />
+    </Suspense>
   );
 }
 
