@@ -20,7 +20,11 @@ export default async function HomePage() {
         </p>
         <AdSlot position="top" />
       </section>
-      <InfiniteQuizFeed quizzes={quizzes} />
+      <InfiniteQuizFeed
+        quizzes={quizzes}
+        initialCount={quizzes.length}
+        pageSize={quizzes.length}
+      />
     </div>
   );
 }
