@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { resolveMongoUri } from "@/lib/mongoUri";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = resolveMongoUri();
 
 declare global {
   // eslint-disable-next-line no-var
@@ -19,10 +20,6 @@ if (!global.mongooseConn) {
 export async function connectMongo(): Promise<typeof mongoose> {
   if (global.mongooseConn?.conn) {
     return global.mongooseConn.conn;
-  }
-
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not set");
   }
 
   if (!global.mongooseConn?.promise) {

@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import { resolveMongoUri } from "@/lib/mongoUri";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -6,10 +7,7 @@ declare global {
 }
 
 function createMongoClientPromise() {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    return Promise.reject(new Error("MONGODB_URI is not set"));
-  }
+  const uri = resolveMongoUri();
   const mongoClient = new MongoClient(uri);
   return mongoClient.connect();
 }

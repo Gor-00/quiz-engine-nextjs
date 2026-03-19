@@ -13,6 +13,24 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MONGO_CONFIG_ERROR_PATTERNS = [
+  "MongoDB connection string is not set",
+  "MongoDB connection"
+] as const;
+
+function isMongoServerError(message: string) {
+  return MONGO_CONFIG_ERROR_PATTERNS.some((pattern) =>
+    message.includes(pattern)
+  );
+}
+
+function mongoHint() {
+  if (process.env.NODE_ENV === "production") {
+    return "Set one of these server env vars in your deployment: MONGODB_URI, MONGODB_URL, MONGO_URL, or DATABASE_URL.";
+  }
+  return "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server.";
+}
+
 type Params = {
   params: { slug: string };
 };
@@ -90,15 +108,8 @@ export async function PUT(req: Request, { params }: Params) {
       );
     }
 
-    const status =
-      message.includes("MONGODB_URI is not set") ||
-      message.includes("MongoDB connection")
-        ? 500
-        : 400;
-    const hint =
-      status === 500
-        ? "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server."
-        : undefined;
+    const status = isMongoServerError(message) ? 500 : 400;
+    const hint = status === 500 ? mongoHint() : undefined;
     return NextResponse.json(
       hint ? { error: message, hint } : { error: message },
       { status }
@@ -123,15 +134,8 @@ export async function DELETE(_req: Request, { params }: Params) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete quiz";
-    const status =
-      message.includes("MONGODB_URI is not set") ||
-      message.includes("MongoDB connection")
-        ? 500
-        : 400;
-    const hint =
-      status === 500
-        ? "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server."
-        : undefined;
+    const status = isMongoServerError(message) ? 500 : 400;
+    const hint = status === 500 ? mongoHint() : undefined;
     return NextResponse.json(
       hint ? { error: message, hint } : { error: message },
       { status }
