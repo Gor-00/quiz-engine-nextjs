@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { seoGenerator } from "@/lib/seoGenerator";
 import { StickyAd } from "@/components/StickyAd";
@@ -18,9 +19,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+
   return (
     <html lang="en">
       <body className="bg-slate-950 text-slate-50">
+        {adsenseClient ? (
+          <Script
+            id="adsense-script"
+            async
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
         <AuthProvider>
           <LanguageProvider>
             <div className="bg-hero-glow">
