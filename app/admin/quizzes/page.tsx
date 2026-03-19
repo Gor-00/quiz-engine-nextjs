@@ -16,6 +16,9 @@ export default function AdminQuizzesPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [confirmDeleteSlug, setConfirmDeleteSlug] = useState<string | null>(
+    null
+  );
   const [query, setQuery] = useState("");
 
   async function loadQuizzes() {
@@ -40,10 +43,8 @@ export default function AdminQuizzesPage() {
     void loadQuizzes();
   }, []);
 
-  async function handleDelete(slug: string) {
-    const ok = window.confirm(`Delete quiz "${slug}"? This cannot be undone.`);
-    if (!ok) return;
-
+  async function performDelete(slug: string) {
+    setConfirmDeleteSlug(null);
     setDeletingSlug(slug);
     setMessage(null);
     try {
@@ -73,6 +74,8 @@ export default function AdminQuizzesPage() {
       quiz.category.toLowerCase().includes(q)
     );
   });
+
+  const slugToDelete = confirmDeleteSlug ?? null;
 
   return (
     <div className="space-y-6">
@@ -183,7 +186,7 @@ export default function AdminQuizzesPage() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => handleDelete(quiz.slug)}
+                      onClick={() => setConfirmDeleteSlug(quiz.slug)}
                       disabled={deletingSlug === quiz.slug}
                       className="inline-flex items-center justify-center rounded-full border border-red-800 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/10 disabled:opacity-60"
                     >
@@ -202,6 +205,50 @@ export default function AdminQuizzesPage() {
           </p>
         )}
       </section>
+
+      {slugToDelete ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950/95 p-5 shadow-soft">
+            <h2 className="text-lg font-semibold text-slate-50">
+              Delete quiz?
+            </h2>
+            <p className="mt-2 text-sm text-slate-300">
+              Are you sure you want to delete quiz{" "}
+              <span className="font-semibold text-slate-100">
+                &quot;{slugToDelete}&quot;
+              </span>
+              ? This cannot be undone.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteSlug(null)}
+                disabled={deletingSlug === slugToDelete}
+                className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!slugToDelete) return;
+                  void performDelete(slugToDelete);
+                }}
+                disabled={deletingSlug === slugToDelete}
+                className="rounded-full bg-red-500 px-4 py-2 text-xs font-semibold text-white shadow-soft hover:bg-red-400 disabled:opacity-60"
+              >
+                {deletingSlug === slugToDelete
+                  ? "Deleting…"
+                  : "Yes, delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

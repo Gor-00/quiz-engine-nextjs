@@ -8,17 +8,22 @@ import { AiGenerateLauncher } from "@/components/admin/AiGenerateLauncher";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function AnalyticsPage() {
-  const { data: analytics } = useSWR<AnalyticsDoc[]>(
+  const { data: analytics, isLoading: analyticsLoading } = useSWR<AnalyticsDoc[]>(
     "/api/admin/analytics",
     fetcher
   );
-  const { data: quizzes } = useSWR<DbQuiz[]>("/api/admin/quizzes", fetcher);
+  const { data: quizzes, isLoading: quizzesLoading } = useSWR<DbQuiz[]>(
+    "/api/admin/quizzes",
+    fetcher
+  );
 
   const rows =
     analytics?.map((a) => ({
       ...a,
       quiz: quizzes?.find((q) => q._id === a.quizId)
     })) ?? [];
+
+  const isLoading = analyticsLoading || quizzesLoading;
 
   return (
     <div className="space-y-6">
@@ -64,23 +69,40 @@ export default function AnalyticsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row._id?.toString?.() ?? row.quizId}
-                className="border-b border-slate-900"
-              >
-                <td className="py-1">
-                  {row.quiz?.slug ?? row.quizId}
-                </td>
-                <td className="py-1">{row.views}</td>
-                <td className="py-1">{row.completions}</td>
-                <td className="py-1">
-                  {row.views
-                    ? `${Math.round((row.completions / row.views) * 100)}%`
-                    : "—"}
-                </td>
-              </tr>
-            ))}
+            {isLoading
+              ? [0, 1, 2, 3, 4].map((i) => (
+                  <tr key={i} className="border-b border-slate-900">
+                    <td className="py-1">
+                      <div className="h-3 w-28 animate-pulse rounded bg-slate-800" />
+                    </td>
+                    <td className="py-1">
+                      <div className="h-3 w-10 animate-pulse rounded bg-slate-800" />
+                    </td>
+                    <td className="py-1">
+                      <div className="h-3 w-10 animate-pulse rounded bg-slate-800" />
+                    </td>
+                    <td className="py-1">
+                      <div className="h-3 w-12 animate-pulse rounded bg-slate-800" />
+                    </td>
+                  </tr>
+                ))
+              : rows.map((row) => (
+                  <tr
+                    key={row._id?.toString?.() ?? row.quizId}
+                    className="border-b border-slate-900"
+                  >
+                    <td className="py-1">
+                      {row.quiz?.slug ?? row.quizId}
+                    </td>
+                    <td className="py-1">{row.views}</td>
+                    <td className="py-1">{row.completions}</td>
+                    <td className="py-1">
+                      {row.views
+                        ? `${Math.round((row.completions / row.views) * 100)}%`
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </section>

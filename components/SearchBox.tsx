@@ -11,20 +11,28 @@ export function SearchBox() {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [loading, setLoading] = useState(true);
   const { t, localize } = useI18n();
 
   useEffect(() => {
     let active = true;
 
     async function load() {
+      setLoading(true);
       const res = await fetch("/api/quizzes", { cache: "no-store" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        if (active) setLoading(false);
+        return;
+      }
       const data = (await res.json()) as ApiQuiz[];
       if (!active) return;
       setQuizzes(data.map(apiQuizToUiQuiz));
+      setLoading(false);
     }
 
-    void load();
+    void load().catch(() => {
+      if (active) setLoading(false);
+    });
     return () => {
       active = false;
     };
@@ -46,7 +54,7 @@ export function SearchBox() {
       .slice(0, 8);
   }, [localize, query]);
 
-  const showResults = focused && query && results.length > 0;
+  const showResults = focused && query.trim().length > 0;
 
   return (
     <div className="relative w-full max-w-xs">
@@ -64,23 +72,29 @@ export function SearchBox() {
       />
       {showResults ? (
         <div className="absolute right-0 top-full z-40 mt-2 w-full max-w-sm rounded-xl border border-slate-800 bg-slate-950/95 text-xs shadow-soft backdrop-blur">
-          <ul className="max-h-72 overflow-auto">
-            {results.map((quiz) => (
-              <li key={quiz.slug}>
-                <Link
-                  href={`/quiz/${quiz.slug}`}
-                  className="block px-3 py-2 text-slate-100 hover:bg-slate-800"
-                >
-                  <span className="block text-[11px] uppercase tracking-wide text-slate-500">
-                    {quiz.category}
-                  </span>
-                  <span className="line-clamp-1">
-                    {localize(quiz.title)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <div className="px-3 py-2 text-slate-400">Loading…</div>
+          ) : results.length > 0 ? (
+            <ul className="max-h-72 overflow-auto">
+              {results.map((quiz) => (
+                <li key={quiz.slug}>
+                  <Link
+                    href={`/quiz/${quiz.slug}`}
+                    className="block px-3 py-2 text-slate-100 hover:bg-slate-800"
+                  >
+                    <span className="block text-[11px] uppercase tracking-wide text-slate-500">
+                      {quiz.category}
+                    </span>
+                    <span className="line-clamp-1">
+                      {localize(quiz.title)}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="px-3 py-2 text-slate-400">No results</div>
+          )}
         </div>
       ) : null}
     </div>
