@@ -15,6 +15,7 @@ type QuizEngineProps = {
 export function QuizEngine({ quiz }: QuizEngineProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [score, setScore] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -36,6 +37,8 @@ export function QuizEngine({ quiz }: QuizEngineProps) {
     if (isTransitioning) return;
 
     setSelectedIndex(answerIndex);
+    const nextSelectedAnswers = [...selectedAnswers, answerIndex];
+    setSelectedAnswers(nextSelectedAnswers);
     if (isCorrect) {
       setScore((prev) => prev + 1);
     }
@@ -58,7 +61,9 @@ export function QuizEngine({ quiz }: QuizEngineProps) {
         router.push(
           `/result/${quiz.slug}?score=${encodeURIComponent(
             finalScore
-          )}&total=${total}`
+          )}&total=${total}&answers=${encodeURIComponent(
+            nextSelectedAnswers.join(",")
+          )}`
         );
         return;
       }

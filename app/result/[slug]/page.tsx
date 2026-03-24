@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { seoGenerator } from "@/lib/seoGenerator";
 import { buildScoreResult } from "@/lib/scoreCalculator";
 import { ResultCard } from "@/components/ResultCard";
+import { ResultAnswersReview } from "@/components/ResultAnswersReview";
 import { RelatedQuizzes } from "@/components/RelatedQuizzes";
 import { PlayAnotherQuizLink } from "@/components/PlayAnotherQuizLink";
 import { DEFAULT_LANGUAGE, getLocalizedText } from "@/lib/i18n";
@@ -35,6 +36,15 @@ export default async function ResultPage({
 
   const score = Number(searchParams?.score ?? 0) || 0;
   const total = Number(searchParams?.total ?? quiz.questions.length) || 10;
+  const rawAnswers = searchParams?.answers;
+  const answersParam = Array.isArray(rawAnswers) ? rawAnswers[0] : rawAnswers;
+  const selectedAnswers = (answersParam ?? "")
+    .split(",")
+    .filter((value) => value.length > 0)
+    .map((value) => {
+      const parsed = Number(value);
+      return Number.isInteger(parsed) ? parsed : null;
+    });
 
   const scoreResult = buildScoreResult(score, total);
   const related = allQuizzes
@@ -45,6 +55,7 @@ export default async function ResultPage({
   return (
     <div className="space-y-6">
       <ResultCard quiz={quiz} scoreResult={scoreResult} />
+      <ResultAnswersReview quiz={quiz} selectedAnswers={selectedAnswers} />
       <RelatedQuizzes quizzes={related} />
       {nextQuiz ? (
         <PlayAnotherQuizLink
