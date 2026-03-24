@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "./LanguageProvider";
+import { QuizCardSkeleton } from "./QuizCardSkeleton";
 import { useIsMobile } from "@/lib/useIsMobile";
 import type { Quiz } from "@/lib/types";
 import type { ApiQuiz } from "@/lib/quizTransform";
@@ -42,48 +43,40 @@ export function NewQuizzes() {
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
         {t("newQuizzes")}
       </h2>
-      <div className="grid gap-3 sm:grid-cols-5">
-        {loading
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80"
+      {loading ? (
+        <QuizCardSkeleton count={5} className="grid gap-3 sm:grid-cols-5" />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-5">
+          {quizzes.map((quiz) => {
+            const title = localize(quiz.title);
+            return (
+              <Link
+                key={quiz.slug}
+                href={
+                  isMobile ? `/quiz/${quiz.slug}?start=1` : `/quiz/${quiz.slug}`
+                }
+                className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80"
               >
-                <div className="aspect-video animate-pulse bg-slate-950" />
-                <div className="p-2">
-                  <div className="h-3 w-4/5 animate-pulse rounded bg-slate-900" />
+                <div className="relative aspect-video">
+                  <Image
+                    src={quiz.image}
+                    alt={title}
+                    fill
+                    sizes="(max-width: 768px) 40vw, 16vw"
+                    className="object-cover transition-transform duration-150 group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
-              </div>
-            ))
-          : quizzes.map((quiz) => {
-              const title = localize(quiz.title);
-              return (
-                <Link
-                  key={quiz.slug}
-                  href={
-                    isMobile ? `/quiz/${quiz.slug}?start=1` : `/quiz/${quiz.slug}`
-                  }
-                  className="group flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80"
-                >
-                  <div className="relative aspect-video">
-                    <Image
-                      src={quiz.image}
-                      alt={title}
-                      fill
-                      sizes="(max-width: 768px) 40vw, 16vw"
-                      className="object-cover transition-transform duration-150 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <p className="line-clamp-2 text-[11px] font-semibold text-slate-100">
-                      {title}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-      </div>
+                <div className="p-2">
+                  <p className="line-clamp-2 text-[11px] font-semibold text-slate-100">
+                    {title}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
