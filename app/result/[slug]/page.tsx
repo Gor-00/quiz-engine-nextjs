@@ -40,8 +40,8 @@ export default async function ResultPage({
   const answersParam = Array.isArray(rawAnswers) ? rawAnswers[0] : rawAnswers;
   const selectedAnswers = (answersParam ?? "")
     .split(",")
-    .filter((value) => value.length > 0)
     .map((value) => {
+      if (value.length === 0) return null;
       const parsed = Number(value);
       return Number.isInteger(parsed) ? parsed : null;
     });

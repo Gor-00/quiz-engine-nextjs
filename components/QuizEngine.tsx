@@ -14,16 +14,13 @@ type QuizEngineProps = {
 
 export function QuizEngine({ quiz }: QuizEngineProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
-  const [score, setScore] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState<Array<number | null>>(
+    () => Array.from({ length: quiz.questions.length }, () => null)
+  );
 
   const router = useRouter();
 
   const total = quiz.questions.length;
-
-  const showAdAfter = useMemo(() => new Set([2, 5, 8]), []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -33,49 +30,58 @@ export function QuizEngine({ quiz }: QuizEngineProps) {
     trackEvent("quiz_start", { quizSlug: quiz.slug, category: quiz.category });
   }, [quiz.category, quiz.slug]);
 
-  function handleSelect(answerIndex: number, isCorrect: boolean) {
-    if (isTransitioning) return;
+  function handleSelect(answerIndex: number) {
+    setSelectedAnswers((prev) => {
+      const next = [...prev];
+      next[currentIndex] = answerIndex;
+      return next;
+    });
+  }
 
-    setSelectedIndex(answerIndex);
-    const nextSelectedAnswers = [...selectedAnswers, answerIndex];
-    setSelectedAnswers(nextSelectedAnswers);
-    if (isCorrect) {
-      setScore((prev) => prev + 1);
-    }
-    setIsTransitioning(true);
+  function goBack() {
+    if (currentIndex === 0) return;
+    setCurrentIndex((prev) => prev - 1);
+  }
 
-    setTimeout(() => {
-      const finalScore = score + (isCorrect ? 1 : 0);
+  function goNext() {
+    const currentSelected = selectedAnswers[currentIndex];
+    if (currentSelected === null) return;
 
-      if (currentIndex + 1 >= total) {
-        trackEvent("quiz_complete", {
-          quizSlug: quiz.slug,
-          category: quiz.category,
-          score: finalScore,
-          total
-        });
-
-        // Ensure the next page starts at the top on mobile.
-        window.scrollTo({ top: 0, behavior: "auto" });
-
-        router.push(
-          `/result/${quiz.slug}?score=${encodeURIComponent(
-            finalScore
-          )}&total=${total}&answers=${encodeURIComponent(
-            nextSelectedAnswers.join(",")
-          )}`
-        );
-        return;
-      }
-
+    if (currentIndex + 1 < total) {
       setCurrentIndex((prev) => prev + 1);
-      setSelectedIndex(null);
-      setIsTransitioning(false);
-    }, 500);
+      return;
+    }
+
+    const finalScore = selectedAnswers.reduce<number>(
+      (acc, selected, questionIndex) => {
+        if (selected === null) return acc;
+        return quiz.questions[questionIndex].answers[selected]?.correct
+          ? acc + 1
+          : acc;
+      },
+      0
+    );
+
+    trackEvent("quiz_complete", {
+      quizSlug: quiz.slug,
+      category: quiz.category,
+      score: finalScore,
+      total
+    });
+
+    // Ensure the next page starts at the top on mobile.
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    router.push(
+      `/result/${quiz.slug}?score=${encodeURIComponent(
+        finalScore
+      )}&total=${total}&answers=${encodeURIComponent(selectedAnswers.join(","))}`
+    );
   }
 
   const question = quiz.questions[currentIndex];
-  const afterIndex = currentIndex + 1;
+  const selectedIndex = selectedAnswers[currentIndex];
+  const canGoNext = selectedIndex !== null;
 
   return (
     <section className="mt-4 space-y-4">
@@ -86,10 +92,13 @@ export function QuizEngine({ quiz }: QuizEngineProps) {
         total={total}
         selectedIndex={selectedIndex}
         onSelect={handleSelect}
+        canGoBack={currentIndex > 0}
+        canGoNext={canGoNext}
+        isLastQuestion={currentIndex === total - 1}
+        onBack={goBack}
+        onNext={goNext}
       />
-      {showAdAfter.has(afterIndex) ? (
-        <InlineAd afterQuestion={afterIndex} />
-      ) : null}
+      <InlineAd afterQuestion={currentIndex + 1} />
     </section>
   );
 }
