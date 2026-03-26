@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ApiQuiz } from "@/lib/quizTransform";
 import { AiGenerateLauncher } from "@/components/admin/AiGenerateLauncher";
+import { DEFAULT_LANGUAGE, getLocalizedText } from "@/lib/i18n";
 
 type ApiError = {
   error?: string;
@@ -68,10 +69,12 @@ export default function AdminQuizzesPage() {
   const filtered = quizzes.filter((quiz) => {
     if (!query.trim()) return true;
     const q = query.toLowerCase();
+    const title = getLocalizedText(quiz.title, DEFAULT_LANGUAGE).toLowerCase();
+    const category = quiz.category.toLowerCase();
     return (
       quiz.slug.toLowerCase().includes(q) ||
-      quiz.title.toLowerCase().includes(q) ||
-      quiz.category.toLowerCase().includes(q)
+      title.includes(q) ||
+      category.includes(q)
     );
   });
 
@@ -137,7 +140,14 @@ export default function AdminQuizzesPage() {
           <p className="text-sm text-slate-300">No quizzes found.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((quiz) => (
+            {filtered.map((quiz) => {
+              const title = getLocalizedText(quiz.title, DEFAULT_LANGUAGE);
+              const description = getLocalizedText(
+                quiz.description,
+                DEFAULT_LANGUAGE
+              );
+
+              return (
               <article
                 key={quiz.slug}
                 className="quiz-card-hover flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60"
@@ -146,7 +156,7 @@ export default function AdminQuizzesPage() {
                   {quiz.image ? (
                     <Image
                       src={quiz.image}
-                      alt={quiz.title}
+                      alt={title}
                       fill
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover"
@@ -167,10 +177,10 @@ export default function AdminQuizzesPage() {
                     </span>
                   </div>
                   <h2 className="line-clamp-2 text-base font-semibold leading-snug">
-                    {quiz.title}
+                    {title}
                   </h2>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-400">
-                    {quiz.description}
+                    {description}
                   </p>
                   <p className="mt-2 text-[11px] text-slate-500">
                     slug: {quiz.slug}
@@ -195,7 +205,8 @@ export default function AdminQuizzesPage() {
                   </div>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
 

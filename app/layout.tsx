@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { seoGenerator } from "@/lib/seoGenerator";
 import { StickyAd } from "@/components/StickyAd";
+import { SideAds } from "@/components/SideAds";
 import { Header } from "@/components/Header";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -46,6 +47,7 @@ export default function RootLayout({
           <LanguageProvider>
             <div className="bg-hero-glow">
               <Header />
+              <SideAds />
               <main className="mx-auto min-h-screen max-w-5xl px-4 pb-24 pt-6">
                 {children}
               </main>
