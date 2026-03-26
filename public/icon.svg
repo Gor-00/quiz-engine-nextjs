@@ -1,13 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="QuizLoop logo">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1022"/>
+      <stop offset="100%" stop-color="#1f1b4d"/>
+    </linearGradient>
+    <linearGradient id="loop" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
     </linearGradient>
   </defs>
-  <circle cx="32" cy="32" r="30" fill="url(#g)"/>
+
+  <circle cx="32" cy="32" r="30" fill="#020617"/>
+  <circle cx="32" cy="32" r="27" fill="url(#orb)"/>
+
+  <!-- Infinity loop: "endless quizzes" idea -->
   <path
-    d="M32 14c-9.94 0-18 8.06-18 18s8.06 18 18 18c3.02 0 5.87-.74 8.37-2.06l4.34 4.34a2.5 2.5 0 1 0 3.54-3.54l-4.33-4.33A17.9 17.9 0 0 0 50 32c0-9.94-8.06-18-18-18zm0 5a13 13 0 1 1 0 26 13 13 0 0 1 0-26z"
-    fill="#ffffff"
+    d="M12 33c0-6 4.8-10.5 10.8-10.5 7.2 0 9.8 9.2 15.2 9.2 2.6 0 4.5-1.8 4.5-4.1 0-2.5-2-4.2-4.7-4.2-2.8 0-4.8 1.6-7 4.3M52 31c0 6-4.8 10.5-10.8 10.5-7.2 0-9.8-9.2-15.2-9.2-2.6 0-4.5 1.8-4.5 4.1 0 2.5 2 4.2 4.7 4.2 2.8 0 4.8-1.6 7-4.3"
+    fill="none"
+    stroke="url(#loop)"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
   />
+
+  <!-- Question mark accent -->
+  <path
+    d="M33 19.5c2.8 0 4.8 1.7 4.8 4.2 0 2.1-1 3.1-2.8 4.2-1.8 1.1-2.5 1.7-2.5 3.4v0.7"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="32.5" cy="36.8" r="1.8" fill="#ffffff"/>
 </svg>

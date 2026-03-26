@@ -7,7 +7,8 @@ import {
   normalizeApiQuiz,
   validateApiQuiz,
   uiQuizToApiQuiz,
-  ApiQuizValidationError
+  ApiQuizValidationError,
+  type ApiQuiz
 } from "@/lib/quizTransform";
 
 export const runtime = "nodejs";
@@ -31,6 +32,32 @@ function mongoHint() {
   return "Set MONGODB_URI in your .env.local (see .env.example), then restart the dev server.";
 }
 
+const localQuizzes = (quizzesData as Quiz[]).map(uiQuizToApiQuiz);
+const localQuizBySlug = new Map(localQuizzes.map((quiz) => [quiz.slug, quiz]));
+
+function mergeWithLocalizedLocalQuiz(quiz: ApiQuiz): ApiQuiz {
+  const localQuiz = localQuizBySlug.get(quiz.slug);
+  if (!localQuiz) return quiz;
+
+  return {
+    ...quiz,
+    title: localQuiz.title,
+    description: localQuiz.description,
+    questions: quiz.questions.map((question, questionIndex) => {
+      const localQuestion = localQuiz.questions[questionIndex];
+      if (!localQuestion) return question;
+
+      return {
+        ...question,
+        question: localQuestion.question,
+        answers: question.answers.map(
+          (answer, answerIndex) => localQuestion.answers[answerIndex] ?? answer
+        )
+      };
+    })
+  };
+}
+
 type Params = {
   params: { slug: string };
 };
@@ -44,14 +71,14 @@ export async function GET(_req: Request, { params }: Params) {
     if (!quiz) {
       return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
     }
-    return NextResponse.json(quiz);
+    return NextResponse.json(mergeWithLocalizedLocalQuiz(quiz as ApiQuiz));
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      const fallback = (quizzesData as Quiz[]).find((q) => q.slug === slug);
+      const fallback = localQuizBySlug.get(slug);
       if (!fallback) {
         return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
       }
-      return NextResponse.json(uiQuizToApiQuiz(fallback));
+      return NextResponse.json(fallback);
     }
     const message =
       error instanceof Error ? error.message : "Failed to load quiz";

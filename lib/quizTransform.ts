@@ -1,15 +1,16 @@
 import type { Quiz } from "./types";
+import type { LocalizedText } from "./types";
 
 export type ApiQuiz = {
   slug: string;
-  title: string;
-  description: string;
+  title: LocalizedText;
+  description: LocalizedText;
   category: string;
   image: string;
   tags?: string[];
   questions: Array<{
-    question: string;
-    answers: string[];
+    question: LocalizedText;
+    answers: LocalizedText[];
     correctIndex: number;
   }>;
   createdAt?: string;
@@ -47,22 +48,32 @@ function getText(value: unknown): string {
   return "";
 }
 
+function toLocalizedText(value: unknown): LocalizedText {
+  if (typeof value === "string") {
+    return { en: value, am: value, fr: value };
+  }
+  if (value && typeof value === "object") {
+    const raw = value as Partial<Record<"en" | "am" | "fr", unknown>>;
+    const en = String(raw.en ?? raw.am ?? raw.fr ?? "");
+    const am = String(raw.am ?? raw.en ?? raw.fr ?? en);
+    const fr = String(raw.fr ?? raw.en ?? raw.am ?? en);
+    return { en, am, fr };
+  }
+  return { en: "", am: "", fr: "" };
+}
+
 export function apiQuizToUiQuiz(apiQuiz: ApiQuiz): Quiz {
   return {
     slug: apiQuiz.slug,
-    title: { en: apiQuiz.title, am: apiQuiz.title, fr: apiQuiz.title },
-    description: {
-      en: apiQuiz.description,
-      am: apiQuiz.description,
-      fr: apiQuiz.description
-    },
+    title: toLocalizedText(apiQuiz.title),
+    description: toLocalizedText(apiQuiz.description),
     image: apiQuiz.image,
     category: apiQuiz.category,
     tags: apiQuiz.tags ?? [],
     questions: apiQuiz.questions.map((q) => ({
-      question: { en: q.question, am: q.question, fr: q.question },
+      question: toLocalizedText(q.question),
       answers: q.answers.map((answer, index) => ({
-        text: { en: answer, am: answer, fr: answer },
+        text: toLocalizedText(answer),
         correct: index === q.correctIndex
       })) as [any, any]
     }))
@@ -72,19 +83,19 @@ export function apiQuizToUiQuiz(apiQuiz: ApiQuiz): Quiz {
 export function uiQuizToApiQuiz(quiz: Quiz): ApiQuiz {
   return {
     slug: quiz.slug,
-    title: getText(quiz.title),
-    description: getText(quiz.description),
+    title: quiz.title,
+    description: quiz.description,
     category: quiz.category,
     image: quiz.image,
     tags: quiz.tags ?? [],
     questions: (quiz.questions ?? []).map((q) => {
-      const answers = q.answers.map((a) => getText(a.text));
+      const answers = q.answers.map((a) => a.text);
       const correctIndex = Math.max(
         0,
         q.answers.findIndex((a) => a.correct)
       );
       return {
-        question: getText(q.question),
+        question: q.question,
         answers,
         correctIndex
       };
@@ -105,14 +116,16 @@ export function normalizeApiQuiz(payload: unknown): ApiQuiz {
   ) {
     return {
       slug: String(raw.slug ?? "").trim(),
-      title: String(raw.title ?? "").trim(),
-      description: String(raw.description ?? "").trim(),
+      title: getText(raw.title),
+      description: getText(raw.description),
       category: String(raw.category ?? "").trim(),
       image: String(raw.image ?? "").trim(),
       tags: Array.isArray(raw.tags) ? raw.tags.map((t: any) => String(t)) : [],
       questions: raw.questions.map((q: any) => ({
-        question: String(q.question ?? "").trim(),
-        answers: Array.isArray(q.answers) ? q.answers.map((a: any) => String(a)) : [],
+        question: getText(q.question),
+        answers: Array.isArray(q.answers)
+          ? q.answers.map((a: any) => getText(a))
+          : [],
         correctIndex: Number(q.correctIndex ?? 0)
       }))
     };
@@ -131,8 +144,10 @@ export function validateApiQuiz(quiz: ApiQuiz): void {
       "Slug must be lowercase and URL-safe (letters, numbers, dashes)";
   }
 
-  if (!quiz.title) fieldErrors.title = "Title is required";
-  if (!quiz.description) fieldErrors.description = "Description is required";
+  if (!getText(quiz.title).trim()) fieldErrors.title = "Title is required";
+  if (!getText(quiz.description).trim()) {
+    fieldErrors.description = "Description is required";
+  }
   if (!quiz.category) fieldErrors.category = "Category is required";
   if (!quiz.image) fieldErrors.image = "Image is required";
 
@@ -140,12 +155,15 @@ export function validateApiQuiz(quiz: ApiQuiz): void {
     fieldErrors.questions = "Quiz must have at least one question";
   } else {
     quiz.questions.forEach((q, idx) => {
-      if (!q.question) {
+      if (!getText(q.question).trim()) {
         fieldErrors[`questions.${idx}.question`] = "Question text is required";
       }
       if (!Array.isArray(q.answers) || q.answers.length < 2) {
         fieldErrors[`questions.${idx}.answers`] =
           "At least two answers are required";
+      } else if (q.answers.some((answer) => !getText(answer).trim())) {
+        fieldErrors[`questions.${idx}.answers`] =
+          "Answers must contain non-empty text";
       }
       const answersLen = Array.isArray(q.answers) ? q.answers.length : 0;
       if (answersLen > 0) {

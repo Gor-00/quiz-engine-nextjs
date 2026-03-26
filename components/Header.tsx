@@ -89,13 +89,13 @@ export function Header() {
     <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <div className="relative h-8 w-8 overflow-hidden rounded-full border border-indigo-500/60 bg-slate-950">
+          <div className="relative h-10 w-10 overflow-hidden rounded-full border border-indigo-500/60 bg-slate-950">
             <Image
-              src="/logo-quizloop.png"
+              src="/icon.svg"
               alt="QuizLoop logo"
               fill
-              sizes="32px"
-              className="object-cover"
+              sizes="40px"
+              className="object-contain p-0.5"
               priority
             />
           </div>
